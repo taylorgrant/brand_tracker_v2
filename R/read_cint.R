@@ -72,6 +72,12 @@ read_cint <- function(file_loc) {
   if ("weights_tv" %in% names(df)) {
     assign("tv", df |> srvyr::as_survey_design(ids = 1, weight = weights_tv), envir = .GlobalEnv)
   }
+  if ("weights_you_tube" %in% names(df)) {
+    assign("youtube", df |> srvyr::as_survey_design(ids = 1, weight = weights_you_tube), envir = .GlobalEnv)
+  }
+  if ("weights_ooh" %in% names(df)) {
+    assign("ooh", df |> srvyr::as_survey_design(ids = 1, weight = weights_ooh), envir = .GlobalEnv)
+  }
   assign("unweighted", df |> srvyr::as_survey_design(ids = NULL), envir = .GlobalEnv)
   assign("df", df, envir = .GlobalEnv)
 }
