@@ -58,7 +58,8 @@ read_cint <- function(file_loc) {
       date = as.Date(end_date, format = "%m/%d/%Y"),
       month = lubridate::month(date, label = TRUE),
       across(starts_with("weights"), ~ dplyr::if_else(is.na(.), 0, .))
-    )
+    ) |> 
+    rename_with(~ stringr::str_replace(., "att_brfuncitonal_", "att_brfunctional_"))
   
   if ("weights_digital" %in% names(df)) {
     assign("digital", df |> srvyr::as_survey_design(ids = 1, weight = weights_digital), envir = .GlobalEnv)
