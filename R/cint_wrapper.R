@@ -11,14 +11,14 @@ cint_wrapper <- function(file_location, brand, sig_thresh, my_groups = NULL) {
   source(here::here("R", "create_directory.R"))
   # source(here::here("R", "tracker_table.R"))
   source(here::here("R", "tracker_dumbell.R"))
-  # source(here::here("R", "brand_choice_all.R"))
-  # source(here::here("R", "question_summary_all_brands.R"))
-  # source(here::here("R", "proptest_dataframe.R"))
-  # source(here::here("R", "process_list.R"))
-  # source(here::here("R", "sig_table.R"))
+  source(here::here("R", "brand_choice_all_brands.R"))
+  source(here::here("R", "question_summary_all_brands.R"))
+  source(here::here("R", "proptest_dataframe.R"))
+  source(here::here("R", "process_list.R"))
+  source(here::here("R", "sig_table.R"))
   # source(here::here("R", "mental_advantage.R"))
-  # source(here::here("R", "process_all_brands.R"))
-  # source(here::here("R", "raw_tables.R"))
+  source(here::here("R", "process_all_brands.R"))
+  source(here::here("R", "raw_tables.R"))
   
   # 1. READ IN THE SURVEY DATA FROM CINT ------------------------------------
   read_cint(file_location)
@@ -75,30 +75,31 @@ cint_wrapper <- function(file_location, brand, sig_thresh, my_groups = NULL) {
   # 5. PASS DATA TO DUMBBELL PLOTTER ----------------------------------------
   if ("weights_xmedia" %in% names(unweighted$variables)) {
     purrr::map(campaign_results, ~tracker_dumbbell(.x, brand, sig = sig_thresh, group_filter, "Campaign"))
+    raw_tables(campaign_results, filters = f, name = "campaign")
   }
   if ("weights_social" %in% names(unweighted$variables)) {
     purrr::map(social_results, ~tracker_dumbbell(.x, brand, sig = sig_thresh, group_filter, "Social"))
+    raw_tables(social_results, filters = f, name = "social")
   }
   if ("weights_digital" %in% names(unweighted$variables)) {
     purrr::map(digital_results, ~tracker_dumbbell(.x, brand, sig = sig_thresh, group_filter, "Digital"))
+    raw_tables(digital_results, filters = f, name = "digital")
   }
   if ("weights_tv" %in% names(unweighted$variables)) {
     purrr::map(tv_results, ~tracker_dumbbell(.x, brand, sig = sig_thresh, group_filter, "TV"))
+    raw_tables(tv_results, filters = f, name = "tv")
   }
   if ("weights_you_tube" %in% names(unweighted$variables)) {
     purrr::map(youtube_results, ~tracker_dumbbell(.x, brand, sig = sig_thresh, group_filter, "YouTube"))
+    raw_tables(youtube_results, filters = f, name = "youtube")
   }
   if ("weights_ooh" %in% names(unweighted$variables)) {
     purrr::map(ooh_results, ~tracker_dumbbell(.x, brand, sig = sig_thresh, group_filter, "OOH"))
+    raw_tables(ooh_results, filters = f, name = "ooh")
   }
-  
-  # 
-  # 
-  # 
-  # 
+
   # # run full competitive to get entire table
-  # process_all_brands(f)
-  # raw_tables(campaign_results, filters = f)
+  process_all_brands(f, sig_thresh)
 }
 
 
