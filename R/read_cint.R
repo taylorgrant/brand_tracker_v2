@@ -55,6 +55,7 @@ read_cint <- function(file_loc) {
           rowSums(dplyr::across(dplyr::any_of(premium_makes), ~ as.integer(. != "0"))) > 0 ~ 'Premium',
         TRUE ~ "Non-Premium"
       ),
+      ev_intender = ifelse(vehicle_type_1 == "Fully electric", "EVIntender", "Non"),
       date = as.Date(end_date, format = "%m/%d/%Y"),
       month = lubridate::month(date, label = TRUE),
       across(starts_with("weights"), ~ dplyr::if_else(is.na(.), 0, .))
