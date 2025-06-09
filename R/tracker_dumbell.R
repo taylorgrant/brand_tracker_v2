@@ -85,7 +85,14 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
                     axis_text_size = 8,
                     lift_size = 3,
                     fig_height = 4.8) |> 
-      dplyr::select(-svy_q)
+      dplyr::select(-svy_q) |> 
+      dplyr::mutate(`Brand Traits` = 
+                      factor(`Brand Traits`, 
+                             levels = c("Practical", "Adventurous", "Exciting", "Leader",
+                                        "Innovative", "Trusted", "Youthful", "Passionate",
+                                        "Responsible", "Confident", "Distinctive", "Classy",
+                                        "Aggressive", "Arrogant", "Traditional")),
+                    `Brand Traits` = forcats::fct_rev(`Brand Traits`))
     
   } else {
     tmp <- data.table::rbindlist(dat, idcol = "Brand Attributes") |> 
@@ -112,7 +119,17 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
                     text_size = 2.5,
                     axis_text_size = 8,
                     lift_size = 3,
-                    fig_height = 4.8)
+                    fig_height = 4.8) |> 
+      dplyr::mutate(`Brand Attributes` = 
+                      factor(`Brand Attributes`, 
+                             levels = c("Good value for the money", "Environmentally friendly", "Lasts a long time", 
+                                        "Reliable",
+                                        "Fun to drive", "Customer-oriented dealerships", "Attractive styling", 
+                                        "Comfortable",
+                                        "Advanced tech features", "Advanced safety features", 
+                                        "Responsive handling", "Quality materials, fit, and finish",
+                                        "Customizable", "Prestigious", "Strong brand heritage")),
+                    `Brand Attributes` = forcats::fct_rev(`Brand Attributes`))
     
   }
   
@@ -150,15 +167,6 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
   sample <- glue::glue("* Statistically significant lift at {scales::percent(sig, accuracy = 1)} confidence interval\n{channel_text}; {sub3} Sample ", 
                        "BMW Aware: Control = {round(tmp$`total_control`[3])}, Exposed = {round(tmp$`total_test`[3])}")
   
-  # convert attributes to factors for consistent plotting 
-  if (names(tmp)[1] == "Brand Traits") {
-    tmp <- tmp |>
-      dplyr::mutate(`Brand Traits` = forcats::fct_rev(`Brand Traits`))
-  } else if (names(tmp)[1] == "Brand Attributes") {
-    tmp <- tmp |>
-      dplyr::mutate(`Brand Attributes` = forcats::fct_rev(`Brand Attributes`))
-  }
-  
   # PLOT --------------------------------------------------------------------
   
   # create directories to save figures
@@ -171,6 +179,9 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
 
   # rename the first column 
   tmp <- tmp |> dplyr::rename(Category = 1)
+  
+  # identify the top row of the data for the plot annotation
+  top_cat <- tmp$Category[which.max(as.numeric(tmp$Category))]
   
   # run data to get gradient
   segment_data <- tmp |> 
@@ -208,10 +219,10 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
                        ggplot2::aes(label = lift, x = Category, y = hi+.15),
               fontface="bold", size = tmp$lift_size, family = "BMW",
               color = tmp$txtcolor) +
-    ggplot2::geom_text(data= tmp[1,],
-                       ggplot2::aes(x=Category, y = hi+.15, label="LIFT"),
+    ggplot2::geom_text(
+                       ggplot2::aes(x=top_cat, y = hi+.15, label="LIFT"),
               color="#7a7d7e", family = "BMW",
-              size=3.1, vjust=-2, fontface="bold") +
+              size=3.1, vjust=-2, fontface="bold", inherit.aes = FALSE) +
     ggplot2::labs(x = NULL, y = NULL,
          title = plot_title,
          subtitle = "Comparing 
