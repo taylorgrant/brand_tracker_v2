@@ -63,10 +63,10 @@ brand_choice <- function(brand) {
   
   bv_vec <- c("unaided_awareness_","awr_a_", "awr_aad_", "con_br_", "pi_br_", "momentum_br_"
               )
-  bpt_vec <- c("att_brpersonality_1_", "att_brpersonality_2_", "att_brpersonality_3_", 
-              "att_brpersonality_4_", "att_brpersonality_5_", "att_brpersonality_6_", 
-              "att_brpersonality_7_", "att_brpersonality_8_", "att_brpersonality_9_", 
-              "att_brpersonality_10_", "att_brpersonality_11_", "att_brpersonality_12_", 
+  bpt_vec <- c("att_brpersonality_1_", "att_brpersonality_2_", "att_brpersonality_3_",
+              "att_brpersonality_4_", "att_brpersonality_5_", "att_brpersonality_6_",
+              "att_brpersonality_7_", "att_brpersonality_8_", "att_brpersonality_9_",
+              "att_brpersonality_10_", "att_brpersonality_11_", "att_brpersonality_12_",
               "att_brpersonality_13_", "att_brpersonality_14_", "att_brpersonality_15_"
               )
   fba_vec <- c("att_brfunctional_1_", "att_brfunctional_2_", "att_brfunctional_3_", 
