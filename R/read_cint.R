@@ -24,7 +24,8 @@ read_cint <- function(file_loc) {
     filter(end_date != "End Date") |> 
     dplyr::distinct(response_id, .keep_all = TRUE) |> 
     dplyr::mutate(
-      across(c(age, freq_total_digital, freq_total_tv, starts_with("weights")), as.numeric),
+      across(c(ti_age, age, freq_total_digital, freq_total_tv, starts_with("weights")), as.numeric),
+      age = ifelse(is.na(age), ti_age, age),
       yob = lubridate::year(Sys.Date()) - age,
       generations = dplyr::case_when(
         yob < 2013 & yob > 1996 ~ "Gen Z",
@@ -56,7 +57,7 @@ read_cint <- function(file_loc) {
         TRUE ~ "Non-Premium"
       ),
       ev_intender = ifelse(vehicle_type_1 == "Fully electric", "EVIntender", "Non"),
-      date = as.Date(end_date, format = "%m/%d/%Y"),
+      date = as.Date(as.numeric(end_date), origin = "1899-12-30"),
       month = lubridate::month(date, label = TRUE),
       across(starts_with("weights"), ~ dplyr::if_else(is.na(.), 0, .))
     ) |> 
