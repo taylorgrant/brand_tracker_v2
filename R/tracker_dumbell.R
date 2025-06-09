@@ -164,8 +164,16 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
   } else {
     plot_title <- glue::glue("{sub3}")
   }
-  sample <- glue::glue("* Statistically significant lift at {scales::percent(sig, accuracy = 1)} confidence interval\n{channel_text}; {sub3} Sample ", 
-                       "BMW Aware: Control = {round(tmp$`total_control`[3])}, Exposed = {round(tmp$`total_test`[3])}")
+  if (names(tmp)[1] == "Category") {
+    sample <- glue::glue("* Statistically significant lift at {scales::percent(sig, accuracy = 1)} confidence interval\n{channel_text}; {sub3} Sample ", 
+                         "BMW Aware: Control = {round(tmp$`total_control`[3])}, Exposed = {round(tmp$`total_test`[3])}"
+                         )
+  } else {
+    sample <- glue::glue("* Statistically significant lift at {scales::percent(sig, accuracy = 1)} confidence interval\n{channel_text}; {sub3} Sample ", 
+                         "BMW Aware: Control = {round(tmp$`total_control`[3])}, Exposed = {round(tmp$`total_test`[3])}",
+                         "\nOptions ordered by Relative Importance on BMW Purchase Consideration")
+  }
+  
   
   # PLOT --------------------------------------------------------------------
   
