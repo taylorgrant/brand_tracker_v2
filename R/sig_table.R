@@ -15,6 +15,11 @@ sig_table <- function(data, note) {
   } 
   # Create the gt table with programmatically generated column labels and subscripting
   data |> 
+    #
+    # if need to add in reference point of 2024 #
+    # cbind(tibble("BMW 2024" = c( "60%", "95%", "41%", "44%", "--", "49%"))) |>
+    # relocate("BMW 2024", .after = cat) |>
+    #
     gt() |> 
     # hide the cat column from the table
     cols_hide(columns = "cat") |> 
