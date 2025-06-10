@@ -15,17 +15,20 @@ brand_choice_all_brands <- function() {
     # Add a brand column to each tibble and accumulate
     all_brand_vars <- dplyr::bind_rows(
       all_brand_vars,
-      result$brand_vars |>  dplyr::mutate(brand = brand)
+      result$brand_vars |>  
+        dplyr::mutate(brand = brand)
     )
     
     all_brand_traits <- dplyr::bind_rows(
       all_brand_traits,
-      result$brand_traits |>  dplyr::mutate(brand = brand)
+      result$brand_traits |>  
+        dplyr::mutate(brand = brand)
     )
     
     all_brand_attrs <- dplyr::bind_rows(
       all_brand_attrs,
-      result$brand_attrs |>  dplyr::mutate(brand = brand)
+      result$brand_attrs |>  
+        dplyr::mutate(brand = brand)
     )
   }
   
