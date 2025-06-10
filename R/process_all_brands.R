@@ -5,6 +5,12 @@ process_all_brands <- function(group_filter, sig_thresh){
   # get all of the questions with proper ID variables
   tracker_qs <- brand_choice_all_brands()
   
+  key_trait_drivers <- c("Practical", "Adventurous", "Exciting", "Leader",
+                         "Innovative", "Trusted", "Youthful", "Passionate")
+  
+  key_attr_drivers <- c("Good value for the money", "Environmentally friendly", "Lasts a long time", 
+                        "Reliable", "Fun to drive", "Customer-oriented dealerships", "Attractive styling")
+  
   # process three levels of data across all brands 
   process_tracker <- function(tracker_section_data, tracker_qs) {
     brand_vars <- purrr::map(tracker_qs$brand_vars$var, ~question_summary_all_brands(data = tracker_section_data, groups = my_groups, qq = .x)) |> 
@@ -63,14 +69,25 @@ process_all_brands <- function(group_filter, sig_thresh){
     dplyr::tibble() |> 
     dplyr::arrange(Category) |> 
     dplyr::mutate(cat = "Brand Traits") |> 
-    dplyr::mutate(Category = factor(Category)) |> 
+    dplyr::mutate(Category = ifelse(Category %in% key_trait_drivers, paste0(Category, "†"), Category)) |> 
+    dplyr::mutate(Category = factor(Category,
+                                    levels = c("Practical†", "Adventurous†", "Exciting†", "Leader†",
+                                               "Innovative†", "Trusted†", "Youthful†", "Passionate†",
+                                               "Responsible", "Confident", "Distinctive", "Classy",
+                                               "Aggressive", "Arrogant", "Traditional"))) |> 
     dplyr::mutate(svy_q = factor(svy_q, levels = c("BMW", "Audi", "Lexus", "Mercedes Benz", "Tesla"))) |> 
     dplyr::arrange(Category, svy_q)
   
   brand_attrs_tbl <- data.table::rbindlist(brand_attrs, idcol = "Category") |> 
     dplyr::tibble() |> 
     dplyr::mutate(cat = "Brand Attributes") |> 
-    dplyr::mutate(Category = factor(Category),
+    dplyr::mutate(Category = ifelse(Category %in% key_attr_drivers, paste0(Category, "†"), Category)) |> 
+    dplyr::mutate(Category = factor(Category,
+                                    levels = c("Good value for the money†", "Environmentally friendly†", "Lasts a long time†", 
+                                               "Reliable†", "Fun to drive†", "Customer-oriented dealerships†", "Attractive styling†",
+                                               "Comfortable", "Advanced tech features", "Advanced safety features",
+                                               "Responsive handling", "Quality materials, fit, and finish",
+                                               "Customizable", "Prestigious", "Strong brand heritage")),
                   svy_q = factor(svy_q, levels = c("BMW", "Audi", "Lexus", "Mercedes Benz", "Tesla"))) |> 
     dplyr::arrange(Category, svy_q)
   
@@ -107,13 +124,20 @@ process_all_brands <- function(group_filter, sig_thresh){
   # now split the dataframe into a series of lists by question category 
   all_results <- split(tmp, tmp$Category)
   
-  if (sub3 == "Overall") {
-    footnote <- glue::glue("Total Sample; N: {scales::comma(unique(all_results[[1]]$total))}; (A,B,C,D,E) indicate significant difference at {scales::percent(sig_thresh, accuracy = 1)} confidence interval")
-    footnote2 <- glue::glue("Total Sample; N: {scales::comma(unique(all_results[[1]]$total))}")
+  base_note <- if (sub3 == "Overall") {
+    glue::glue("Total Sample; N: {scales::comma(unique(all_results[[1]]$total))}; (A,B,C,D,E) indicate significant difference at {scales::percent(sig_thresh, accuracy = 1)} confidence interval")
   } else {
-    footnote <- glue::glue("{sub3} subsample; N: {scales::comma(unique(all_results[[1]]$total))}; (A,B,C,D,E) indicate significant difference at {scales::percent(sig_thresh, accuracy = 1)} confidence interval")
-    footnote2 <- glue::glue("{sub3} subsample; N: {scales::comma(unique(all_results[[1]]$total))}")
+    glue::glue("{sub3} subsample; N: {scales::comma(unique(all_results[[1]]$total))}; (A,B,C,D,E) indicate significant difference at {scales::percent(sig_thresh, accuracy = 1)} confidence interval")
   }
+  
+  # Add this special note for traits and attributes
+  extra_note <- "†: Key Drivers ordered by Relative Importance on BMW Purchase Consideration"
+  
+  # Build separate footnotes for the three categories
+  footnote_vars <- base_note
+  footnote_traits <- glue::glue("{base_note}<br>{extra_note}")
+  footnote_attrs <- glue::glue("{base_note}<br>{extra_note}")
+  
   # run everything through prop.test and formatting for gt
   combined_results <- process_list(all_results, sig_thresh)
   
@@ -124,13 +148,13 @@ process_all_brands <- function(group_filter, sig_thresh){
   path <- create_directory(brand, filters = gsub(" & ", "-", sub3))
   
   # build gt tables  
-  sig_table(results_list$`Brand Metrics`, footnote) |> 
+  sig_table(results_list$`Brand Metrics`, footnote_vars) |> 
     gt::gtsave(file.path(path, "competitive", paste0("sig-", sig_thresh,"-competitive_brand_metrics.png")), expand = 10)
   
-  sig_table(results_list$`Brand Attributes`, footnote) |> 
+  sig_table(results_list$`Brand Attributes`, footnote_attrs) |> 
     gt::gtsave(file.path(path, "competitive", paste0("sig-", sig_thresh,"-competitive_brand_attributes.png")), expand = 10)
   
-  sig_table(results_list$`Brand Traits`, footnote) |> 
+  sig_table(results_list$`Brand Traits`, footnote_traits) |> 
     gt::gtsave(file.path(path, "competitive", paste0("sig-", sig_thresh,"-competitive_brand_traits.png")), expand = 10)
   
   # mental advantage for the attributes 
