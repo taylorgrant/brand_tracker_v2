@@ -19,7 +19,7 @@ process_all_brands <- function(group_filter, sig_thresh){
   reference_filtered <- reference_data |> 
     dplyr::filter(Group == group_name) |> 
     select(-Group) |> 
-    mutate(Ref_2024 = scales::percent(Ref_2024, accuracy = 1))
+    mutate(Ref_2024 = scales::percent(Ref_2024, accuracy = 1)) # eventually, we'll have to use 1st 3 months 2025 data (Mar, Apr, May)
   
   # process three levels of data across all brands 
   process_tracker <- function(tracker_section_data, tracker_qs) {
