@@ -60,6 +60,8 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
     
   
     } else if (names(dat)[1] == "Adventurous") {
+    key_trait_drivers <- c("Practical", "Adventurous", "Exciting", "Leader",
+                       "Innovative", "Trusted", "Youthful", "Passionate")
     tmp <- data.table::rbindlist(dat, idcol = "Brand Traits") |> 
       dplyr::tibble() |> 
       dplyr::select(-c(prop_test, p_value, statistic)) |> 
@@ -86,15 +88,21 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
                     lift_size = 3,
                     fig_height = 4.8) |> 
       dplyr::select(-svy_q) |> 
-      dplyr::mutate(`Brand Traits` = 
-                      factor(`Brand Traits`, 
-                             levels = c("Practical", "Adventurous", "Exciting", "Leader",
-                                        "Innovative", "Trusted", "Youthful", "Passionate",
-                                        "Responsible", "Confident", "Distinctive", "Classy",
-                                        "Aggressive", "Arrogant", "Traditional")),
-                    `Brand Traits` = forcats::fct_rev(`Brand Traits`))
+      dplyr::mutate(`Brand Traits` = ifelse(`Brand Traits` %in% key_trait_drivers,
+                                            paste0(`Brand Traits`, "†"),
+                                            `Brand Traits`))
+    
+    ordered_levels <- c("Practical†", "Adventurous†", "Exciting†", "Leader†",
+                        "Innovative†", "Trusted†", "Youthful†", "Passionate†",
+                        "Responsible", "Confident", "Distinctive", "Classy",
+                        "Aggressive", "Arrogant", "Traditional")
+    
+    tmp <- tmp |>
+      dplyr::mutate(`Brand Traits` = factor(`Brand Traits`, levels = rev(ordered_levels)))
     
   } else {
+    key_attr_drivers <- c("Good value for the money", "Environmentally friendly", "Lasts a long time", 
+                          "Reliable", "Fun to drive", "Customer-oriented dealerships", "Attractive styling")
     tmp <- data.table::rbindlist(dat, idcol = "Brand Attributes") |> 
       dplyr::tibble() |> 
       dplyr::select(-c(prop_test, p_value, statistic)) |> 
@@ -119,17 +127,19 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
                     text_size = 2.5,
                     axis_text_size = 8,
                     lift_size = 3,
-                    fig_height = 4.8) |> 
-      dplyr::mutate(`Brand Attributes` = 
-                      factor(`Brand Attributes`, 
-                             levels = c("Good value for the money", "Environmentally friendly", "Lasts a long time", 
-                                        "Reliable",
-                                        "Fun to drive", "Customer-oriented dealerships", "Attractive styling", 
-                                        "Comfortable",
-                                        "Advanced tech features", "Advanced safety features", 
-                                        "Responsive handling", "Quality materials, fit, and finish",
-                                        "Customizable", "Prestigious", "Strong brand heritage")),
-                    `Brand Attributes` = forcats::fct_rev(`Brand Attributes`))
+                    fig_height = 4.8) |>
+      dplyr::mutate(`Brand Attributes` = ifelse(`Brand Attributes` %in% key_attr_drivers,
+                                            paste0(`Brand Attributes`, "†"),
+                                            `Brand Attributes`))
+    
+    ordered_levels <- c("Good value for the money†", "Environmentally friendly†", "Lasts a long time†", 
+                        "Reliable†", "Fun to drive†", "Customer-oriented dealerships†", "Attractive styling†",
+                        "Comfortable", "Advanced tech features", "Advanced safety features",
+                        "Responsive handling", "Quality materials, fit, and finish",
+                        "Customizable", "Prestigious", "Strong brand heritage")
+    
+    tmp <- tmp |>
+      dplyr::mutate(`Brand Attributes` = factor(`Brand Attributes`, levels = rev(ordered_levels)))
     
   }
   
@@ -171,7 +181,7 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
   } else {
     sample <- glue::glue("* Statistically significant lift at {scales::percent(sig, accuracy = 1)} confidence interval\n{channel_text}; {sub3} Sample ", 
                          "BMW Aware: Control = {round(tmp$`total_control`[3])}, Exposed = {round(tmp$`total_test`[3])}",
-                         "\nOptions ordered by Relative Importance on BMW Purchase Consideration")
+                         "\n†: Key Drivers ordered by Relative Importance on BMW Purchase Consideration")
   }
   
   
@@ -180,7 +190,7 @@ tracker_dumbbell <- function(dat, brand, sig, filters, dataset_type){
   # create directories to save figures
   path <- create_directory(brand, filters = gsub(" & ", "-", sub3))
   file_name <- switch(names(tmp)[1], 
-                      "Category" = paste0(tolower(dataset_type),"-sig-",sig,"-brand_vars_plot.png"),
+                      "Category" = paste0(tolower(dataset_type),"-sig-",sig,"-brand_metrics_plot.png"),
                       "Brand Traits" = paste0(tolower(dataset_type),"-sig-",sig,"-brand_traits_plot.png"),
                       "Brand Attributes" = paste0(tolower(dataset_type),"-sig-",sig,"-brand_attrs_plot.png")
   )
