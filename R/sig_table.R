@@ -39,7 +39,7 @@ sig_table <- function(data, note) {
         cells_row_groups(groups = TRUE))
     ) |> 
     gt::tab_footnote(
-      footnote = note,
+      footnote = gt::md(note),
       locations = gt::cells_title(groups = "title")
     ) |> 
     # aligning the title left
