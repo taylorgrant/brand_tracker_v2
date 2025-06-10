@@ -11,6 +11,16 @@ process_all_brands <- function(group_filter, sig_thresh){
   key_attr_drivers <- c("Good value for the money", "Environmentally friendly", "Lasts a long time", 
                         "Reliable", "Fun to drive", "Customer-oriented dealerships", "Attractive styling")
   
+  # read in reference data 
+  reference_data <- readxl::read_excel(here::here("data", "bmw_ref_values.xlsx"))
+  group_name <- if (length(group_filter) == 0) "Overall" else group_filter
+  
+  # filter reference data down to a specific group (if group isn't in data, reference_filtered is 0 rows)
+  reference_filtered <- reference_data |> 
+    dplyr::filter(Group == group_name) |> 
+    select(-Group) |> 
+    mutate(Ref_2024 = scales::percent(Ref_2024, accuracy = 1))
+  
   # process three levels of data across all brands 
   process_tracker <- function(tracker_section_data, tracker_qs) {
     brand_vars <- purrr::map(tracker_qs$brand_vars$var, ~question_summary_all_brands(data = tracker_section_data, groups = my_groups, qq = .x)) |> 
@@ -43,9 +53,6 @@ process_all_brands <- function(group_filter, sig_thresh){
   
   renamed_total_results <- purrr::map(total_results, ~ purrr::map(.x, rename_groups))
   
-  # apply table_prep to allow user to select filters 
-  # group_filter <- table_prep(renamed_total_results$brand_vars[[1]])
-  
   # get each list and put into tibble for easy filtering if necessary
   brand_vars <- renamed_total_results$brand_vars
   brand_traits <- renamed_total_results$brand_traits
@@ -58,12 +65,11 @@ process_all_brands <- function(group_filter, sig_thresh){
     dplyr::filter(Category != "Brand Momentum") |>
     dplyr::mutate(svy_q = ifelse(svy_q == "On its way up - Top 2 Box", NA, svy_q)) |> 
     tidyr::fill(svy_q, .direction = "down") |> 
-    # dplyr::filter(Category != "Unaided Awareness") |> 
     dplyr::mutate(cat = "Brand Metrics") |> 
     dplyr::mutate(Category = factor(Category, levels = c("Unaided Awareness","Aided Awareness", "Aided Ad Awareness",
                                                   "Purchase Consideration", "Purchase Intent", "Brand Momentum - Top 2 Box"))) |> 
     dplyr::mutate(svy_q = factor(svy_q, levels = c("BMW", "Audi", "Lexus", "Mercedes Benz", "Tesla"))) |> 
-    dplyr::arrange(Category, svy_q)
+    dplyr::arrange(Category, svy_q) 
   
   brand_traits_tbl <- data.table::rbindlist(brand_traits, idcol = "Category") |> 
     dplyr::tibble() |> 
@@ -143,13 +149,30 @@ process_all_brands <- function(group_filter, sig_thresh){
   
   # split again into lists 
   results_list <- split(combined_results, combined_results$cat)
-    
+  
   # to save - need the path 
   path <- create_directory(brand, filters = gsub(" & ", "-", sub3))
   
   # build gt tables  
-  sig_table(results_list$`Brand Metrics`, footnote_vars) |> 
-    gt::gtsave(file.path(path, "competitive", paste0("sig-", sig_thresh,"-competitive_brand_metrics.png")), expand = 10)
+  # conditionally add in reference metrics 
+  if (group_name %in% reference_data$Group) {
+    results_list$`Brand Metrics` <- results_list$`Brand Metrics` |> 
+      dplyr::left_join(reference_filtered, by = "Category") |> 
+      relocate(Ref_2024, .after = "Category") |> 
+      rename(`BMW 2024` = Ref_2024)
+    
+    sig_table(results_list$`Brand Metrics`[,-2], footnote_vars) |> 
+      gt::gtsave(file.path(path, "competitive", paste0("no_ref-sig-", sig_thresh,"-competitive_brand_metrics.png")), expand = 10)
+    
+    sig_table(results_list$`Brand Metrics`, footnote_vars) |> 
+      gt::gtsave(file.path(path, "competitive", paste0("w_ref-sig-", sig_thresh,"-competitive_brand_metrics.png")), expand = 10)
+    
+  } else {
+    
+    sig_table(results_list$`Brand Metrics`, footnote_vars) |> 
+      gt::gtsave(file.path(path, "competitive", paste0("sig-", sig_thresh,"-competitive_brand_metrics.png")), expand = 10)
+    
+  }
   
   sig_table(results_list$`Brand Attributes`, footnote_attrs) |> 
     gt::gtsave(file.path(path, "competitive", paste0("sig-", sig_thresh,"-competitive_brand_attributes.png")), expand = 10)

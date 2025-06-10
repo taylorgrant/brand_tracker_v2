@@ -13,6 +13,7 @@ sig_table <- function(data, note) {
     data <- data |> 
       group_by(bucket)
   } 
+  
   # Create the gt table with programmatically generated column labels and subscripting
   data |> 
     #
@@ -76,6 +77,12 @@ sig_table <- function(data, note) {
     ) |> 
     cols_label(
       Category = ""
+    ) |> 
+    # sub out any NA with --
+    sub_missing(
+      columns = everything(),
+      rows = everything(),
+      missing_text = "---"
     ) |> 
     opt_table_font(
       # font = list(
