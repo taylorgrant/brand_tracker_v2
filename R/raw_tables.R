@@ -6,10 +6,10 @@ raw_tables <- function(data, filters, name){
   } else if (length(filters) == 1) {
     sub3 <- glue::glue("{filters[1]}")
   } else {
-    filters <- glue::glue("Overall")
+    sub3 <- glue::glue("Overall")
   }
   brand <- unique(data$brand_vars_result$`Unaided Awareness`$svy_q)
-  path <- main_path <- here::here("processed",glue::glue("{brand}-{stringr::str_replace(filters, '/', '-')}_{Sys.Date()}"))
+  path <- main_path <- here::here("processed",glue::glue("{brand}-{stringr::str_replace(sub3, '/', '-')}_{Sys.Date()}"))
   
   tmpout <- lapply(data, function(sublist) {
     tmpdf <- data.table::rbindlist(sublist, idcol = "category") |> 
