@@ -9,14 +9,13 @@ cint_wrapper <- function(file_location, brand, sig_thresh, my_groups = NULL) {
   source(here::here("R", "ce_prop_test.R"))
   source(here::here("R", "table_prep.R"))
   source(here::here("R", "create_directory.R"))
-  # source(here::here("R", "tracker_table.R"))
   source(here::here("R", "tracker_dumbell.R"))
+  source(here::here("R", "creative_summary.R"))
   source(here::here("R", "brand_choice_all_brands.R"))
   source(here::here("R", "question_summary_all_brands.R"))
   source(here::here("R", "proptest_dataframe.R"))
   source(here::here("R", "process_list.R"))
   source(here::here("R", "sig_table.R"))
-  # source(here::here("R", "mental_advantage.R"))
   source(here::here("R", "process_all_brands.R"))
   source(here::here("R", "raw_tables.R"))
   
@@ -97,6 +96,9 @@ cint_wrapper <- function(file_location, brand, sig_thresh, my_groups = NULL) {
     purrr::map(ooh_results, ~tracker_dumbbell(.x, brand, sig = sig_thresh, group_filter, "OOH"))
     raw_tables(ooh_results, filters = f, name = "ooh")
   }
+  
+  # creative diagnostics for each creative by group
+  creative_summary_wrapper(group = my_groups, filters = f)
 
   # # run full competitive to get entire table
   process_all_brands(f, sig_thresh)
