@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+/MISC
+/docs
+/processed
+.DS_Store
+/cint_data
+*.png
+*.pptx
+*.pdf
+
+
